@@ -2347,7 +2347,10 @@ impl Application for App {
         match flags.mode {
             Mode::App => {
                 core.window.show_context = flags.config.show_details;
-                // NyxNiri owns the outer geometry; keep the libcosmic surface soft.
+                // NyxNiri provides the visible shell. Keep only the libcosmic
+                // window/header machinery needed for native controls and dialogs.
+                core.window.content_container = false;
+                core.window.show_window_menu = false;
                 core.window.sharp_corners = false;
             }
             Mode::Desktop => {
@@ -2537,10 +2540,13 @@ impl Application for App {
                 .on_surface_action(|action| cosmic::Action::Surface(action.flatten()))
         }
 
-        let mut nav = nav.into_container().padding([8, 6]);
+        let mut nav = nav
+            .into_container()
+            .padding([10, 8])
+            .class(crate::nyx::sidebar());
 
         if !self.core.is_condensed() {
-            nav = nav.max_width(248);
+            nav = nav.max_width(crate::nyx::SIDEBAR_MAX_WIDTH);
         }
 
         Some(Element::from(
@@ -6454,7 +6460,7 @@ impl Application for App {
             } else {
                 elements.push(
                     widget::text_input::search_input("", term)
-                        .width(Length::Fixed(220.0))
+                        .width(Length::Fixed(260.0))
                         .id(self.search_id.clone())
                         .on_clear(Message::SearchClear)
                         .on_input(Message::SearchInput)
