@@ -6037,7 +6037,10 @@ impl Tab {
         bool,
     ) {
         let cosmic_theme::Spacing {
-            space_s, space_xxs, ..
+            space_s,
+            space_xxs,
+            space_xxxs,
+            ..
         } = theme::spacing();
 
         let TabConfig {
