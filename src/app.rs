@@ -6445,12 +6445,29 @@ impl Application for App {
     }
 
     fn header_end(&self) -> Vec<Element<'_, Self::Message>> {
-        let mut elements = Vec::with_capacity(2);
+        let mut elements = Vec::with_capacity(4);
+        let active_entity = self.tab_model.active();
+
+        if let Some(tab) = self.tab_model.data::<Tab>(active_entity) {
+            elements.push(
+                widget::button::icon(icon::from_name("view-grid-symbolic"))
+                    .on_press(Message::TabView(Some(active_entity), tab::View::Grid))
+                    .padding(8)
+                    .selected(matches!(tab.config.view, tab::View::Grid))
+                    .into(),
+            );
+            elements.push(
+                widget::button::icon(icon::from_name("view-list-symbolic"))
+                    .on_press(Message::TabView(Some(active_entity), tab::View::List))
+                    .padding(8)
+                    .selected(matches!(tab.config.view, tab::View::List))
+                    .into(),
+            );
+        }
 
         if let Some(term) = self.search_get() {
             if self.core.is_condensed() {
                 elements.push(
-                    //TODO: selected state is not appearing different
                     widget::button::icon(icon::from_name("system-search-symbolic"))
                         .on_press(Message::SearchClear)
                         .padding(8)
