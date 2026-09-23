@@ -1,0 +1,43 @@
+name: Arch package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'PKGBUILD'
+      - 'justfile'
+      - 'build.rs'
+      - 'res/**'
+      - 'scripts/cosmic-files-niri-setup'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+
+    steps:
+      - name: Install build tools
+        run: pacman -Syu --noconfirm git cargo clang just lld cosmic-icon-theme glib2 gvfs libxkbcommon xdg-utils zstd
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+          runuser -u builder -- bash -lc "cd '$GITHUB_WORKSPACE' && makepkg --noconfirm --syncdeps --cleanbuild --clean"
+
+      - name: Collect package
+        run: mkdir -p dist && cp ./*.pkg.tar.* dist/
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cosmic-files-niri-arch
+          path: dist/*.pkg.tar.*
