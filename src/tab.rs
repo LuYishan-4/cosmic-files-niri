@@ -259,10 +259,13 @@ fn button_style(
             )
         }),
         hovered: Box::new(move |focused, theme| {
+            // Immediate NyxNiri hover feedback. The upstream highlighted state is
+            // still used for keyboard/drag behavior, but pointer hover should not
+            // wait for the delayed highlight timer.
             button_appearance(
                 theme,
                 selected,
-                highlighted,
+                true,
                 cut,
                 focused,
                 accent,
@@ -274,7 +277,7 @@ fn button_style(
             button_appearance(
                 theme,
                 selected,
-                highlighted,
+                true,
                 cut,
                 focused,
                 accent,
@@ -5330,13 +5333,14 @@ impl Tab {
 
         let mut row = widget::row::with_capacity(5)
             .align_y(Alignment::Center)
-            .padding([space_xxxs, 0]);
+            .spacing(space_xxxs)
+            .padding([space_xxs, 0]);
         let mut w = 0.0;
 
         let mut prev_button =
             widget::button::custom(widget::icon::from_name("go-previous-symbolic").size(16))
                 .padding(space_xxs)
-                .class(theme::Button::Icon);
+                .class(theme::Button::HeaderBar);
         if self.history_i > 0 && !self.history.is_empty() {
             prev_button = prev_button.on_press(Message::GoPrevious);
         }
@@ -5346,7 +5350,7 @@ impl Tab {
         let mut next_button =
             widget::button::custom(widget::icon::from_name("go-next-symbolic").size(16))
                 .padding(space_xxs)
-                .class(theme::Button::Icon);
+                .class(theme::Button::HeaderBar);
         if self.history_i + 1 < self.history.len() {
             next_button = next_button.on_press(Message::GoNext);
         }
@@ -5454,7 +5458,7 @@ impl Tab {
                     )
                     .on_press(Message::EditLocation(None))
                     .padding(space_xxs)
-                    .class(theme::Button::Icon),
+                    .class(theme::Button::HeaderBar),
                 );
                 let mut popover =
                     widget::popover(text_input).position(widget::popover::Position::Bottom);
