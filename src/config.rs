@@ -324,11 +324,11 @@ pub struct DialogConfig {
 impl Default for DialogConfig {
     fn default() -> Self {
         Self {
-            folders_first: false,
+            folders_first: true,
             icon_sizes: IconSizes::default(),
             show_details: true,
             show_hidden: false,
-            view: View::List,
+            view: View::Grid,
         }
     }
 }
@@ -382,7 +382,7 @@ impl Default for TabConfig {
             military_time: false,
             show_hidden: false,
             single_click: false,
-            view: View::List,
+            view: View::Grid,
         }
     }
 }
@@ -397,8 +397,9 @@ pub struct IconSizes {
 impl Default for IconSizes {
     fn default() -> Self {
         Self {
-            list: 100.try_into().unwrap(),
-            grid: 100.try_into().unwrap(),
+            // NyxNiri: slightly larger list icons and a spacious, visual grid.
+            list: 110.try_into().unwrap(),
+            grid: 125.try_into().unwrap(),
         }
     }
 }
