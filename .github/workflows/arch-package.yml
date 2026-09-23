@@ -31,7 +31,7 @@ jobs:
         run: |
           useradd -m builder
           chown -R builder:builder "$GITHUB_WORKSPACE"
-          runuser -u builder -- bash -lc "cd '$GITHUB_WORKSPACE' && makepkg --noconfirm --syncdeps --cleanbuild --clean"
+          runuser -u builder -- bash -lc "cd '$GITHUB_WORKSPACE' && makepkg --noconfirm --cleanbuild --clean"
 
       - name: Collect package
         run: mkdir -p dist && cp ./*.pkg.tar.* dist/
