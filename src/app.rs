@@ -2534,7 +2534,7 @@ impl Application for App {
                 .on_surface_action(|action| cosmic::Action::Surface(action.flatten()))
         }
 
-        let mut nav = nav.into_container();
+        let mut nav = nav.into_container().padding([8, 6]);
 
         if !self.core.is_condensed() {
             nav = nav.max_width(248);
