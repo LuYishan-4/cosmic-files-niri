@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+APP_DESKTOP="com.system76.CosmicFiles.desktop"
+NIRI_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/niri"
+PORTAL_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-desktop-portal"
+
+echo "[cosmic-files-niri] Setting COSMIC Files as the default file manager..."
+xdg-mime default "$APP_DESKTOP" inode/directory || true
+xdg-mime default "$APP_DESKTOP" application/x-directory || true
+xdg-mime default "$APP_DESKTOP" x-scheme-handler/file || true
+
+mkdir -p "$PORTAL_DIR"
+
+ensure_filechooser() {
+    local file="$1"
+    if [[ ! -f "$file" ]]; then
+        cat >"$file" <<'EOF'
+[preferred]
+default=gnome;gtk;
+org.freedesktop.impl.portal.Settings=gtk;
+org.freedesktop.impl.portal.Access=gtk;
+org.freedesktop.impl.portal.Notification=gtk;
+org.freedesktop.impl.portal.FileChooser=cosmic;gnome;gtk;
+org.freedesktop.impl.portal.Secret=gnome-keyring;
+EOF
+        return
+    fi
+
+    if grep -q '^org\.freedesktop\.impl\.portal\.FileChooser=' "$file"; then
+        sed -i 's|^org\.freedesktop\.impl\.portal\.FileChooser=.*|org.freedesktop.impl.portal.FileChooser=cosmic;gnome;gtk;|' "$file"
+    elif grep -q '^\[preferred\]' "$file"; then
+        sed -i '/^\[preferred\]/a org.freedesktop.impl.portal.FileChooser=cosmic;gnome;gtk;' "$file"
+    else
+        printf '\n[preferred]\norg.freedesktop.impl.portal.FileChooser=cosmic;gnome;gtk;\n' >>"$file"
+    fi
+}
+
+ensure_filechooser "$PORTAL_DIR/portals.conf"
+ensure_filechooser "$PORTAL_DIR/niri-portals.conf"
+
+if [[ -f "$NIRI_DIR/binds.kdl" ]]; then
+    cp -n "$NIRI_DIR/binds.kdl" "$NIRI_DIR/binds.kdl.cosmic-files-niri.bak" || true
+    sed -i -E 's/spawn "(dolphin|nautilus|nemo)";/spawn "cosmic-files";/g' "$NIRI_DIR/binds.kdl"
+fi
+
+if [[ -f "$NIRI_DIR/rules.kdl" ]] && ! grep -q 'COSMIC_FILES_NIRI_STYLE' "$NIRI_DIR/rules.kdl"; then
+    cp -n "$NIRI_DIR/rules.kdl" "$NIRI_DIR/rules.kdl.cosmic-files-niri.bak" || true
+    cat >>"$NIRI_DIR/rules.kdl" <<'EOF'
+
+// COSMIC_FILES_NIRI_STYLE
+window-rule {
+    match app-id=r"^com\.system76\.CosmicFiles$"
+    opacity 0.90
+    geometry-corner-radius 14
+    clip-to-geometry true
+    draw-border-with-background false
+    background-effect {
+        blur true
+        xray false
+    }
+}
+EOF
+fi
+
+if command -v niri >/dev/null 2>&1; then
+    niri msg action load-config-file >/dev/null 2>&1 || true
+fi
+
+systemctl --user restart xdg-desktop-portal.service >/dev/null 2>&1 || true
+systemctl --user restart xdg-desktop-portal-cosmic.service >/dev/null 2>&1 || true
+
+echo
+echo "COSMIC Files Niri integration is ready."
+echo "Default file manager: $(xdg-mime query default inode/directory 2>/dev/null || true)"
+echo "Log out and back in once if portal file pickers do not change immediately."
