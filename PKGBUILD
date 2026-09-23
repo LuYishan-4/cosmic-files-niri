@@ -37,7 +37,13 @@ build() {
   cd "$srcdir/cosmic-files-niri"
   export CARGO_TARGET_DIR=target
   export RUSTFLAGS="${RUSTFLAGS:-} -C link-arg=-fuse-ld=lld"
-  cargo build --release --locked --workspace
+  # Build each target separately. Building the whole workspace in one Cargo
+  # invocation unifies cosmic-files-applet's `desktop-applet` feature into the
+  # main cosmic-files package, which enables layer-surface overlap subscriptions
+  # that do not belong in a normal Niri application window.
+  cargo build --release --locked --package cosmic-files
+  cargo build --release --locked --package cosmic-files-applet
+  cargo build --release --locked --package cosmic-files-thumbnailer
 }
 
 package() {
