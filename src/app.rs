@@ -6538,7 +6538,8 @@ impl Application for App {
                         .drag_id(self.tab_drag_id),
                 )
                 .width(Length::Fill)
-                .padding([0, space_s]),
+                .padding([space_xxs, space_s])
+                .class(crate::nyx::toolbar()),
             );
         }
 
