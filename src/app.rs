@@ -2347,6 +2347,8 @@ impl Application for App {
         match flags.mode {
             Mode::App => {
                 core.window.show_context = flags.config.show_details;
+                // NyxNiri owns the outer geometry; keep the libcosmic surface soft.
+                core.window.sharp_corners = false;
             }
             Mode::Desktop => {
                 core.window.content_container = false;
@@ -2392,16 +2394,20 @@ impl Application for App {
             .license_url("https://spdx.org/licenses/GPL-3.0-only")
             .developers([("Jeremy Soller", "jeremy@system76.com")])
             .links([
-                (fl!("repository"), "https://github.com/pop-os/cosmic-files"),
+                (
+                    fl!("repository"),
+                    "https://github.com/LuYishan-4/cosmic-files-niri",
+                ),
                 (
                     fl!("support"),
-                    "https://github.com/pop-os/cosmic-files/issues",
+                    "https://github.com/LuYishan-4/cosmic-files-niri/issues",
                 ),
             ]);
 
-        if matches!(flags.mode, Mode::Desktop) {
-            core.set_auto_blur(Auto::Window | Auto::Popup);
-        }
+        // NyxNiri uses translucent windows, so request blur for the normal app
+        // as well as desktop surfaces. Compositors that do not support it simply
+        // render the normal COSMIC background.
+        core.set_auto_blur(Auto::Window | Auto::Popup);
         let mut app = Self {
             core,
             about,
@@ -2531,7 +2537,7 @@ impl Application for App {
         let mut nav = nav.into_container();
 
         if !self.core.is_condensed() {
-            nav = nav.max_width(280);
+            nav = nav.max_width(248);
         }
 
         Some(Element::from(
@@ -6445,7 +6451,7 @@ impl Application for App {
             } else {
                 elements.push(
                     widget::text_input::search_input("", term)
-                        .width(Length::Fixed(240.0))
+                        .width(Length::Fixed(220.0))
                         .id(self.search_id.clone())
                         .on_clear(Message::SearchClear)
                         .on_input(Message::SearchInput)
@@ -6491,7 +6497,7 @@ impl Application for App {
             tab_column = tab_column.push(
                 widget::container(
                     widget::tab_bar::horizontal(&self.tab_model)
-                        .button_height(32)
+                        .button_height(30)
                         .button_spacing(space_xxs)
                         .enable_tab_drag(String::from("x-cosmic-files/tab-dnd"))
                         .on_reorder(Message::ReorderTab)
