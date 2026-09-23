@@ -1,26 +1,38 @@
-# cosmic-files
-File manager for the COSMIC desktop environment
+# COSMIC Files for Niri / NyxNiri
 
-## Build the project from source
+A Niri-focused fork of [pop-os/cosmic-files](https://github.com/pop-os/cosmic-files).
+
+This fork keeps the COSMIC Files codebase and file-management features while
+adjusting the default UI for a modern Niri/NyxNiri desktop:
+
+- grid view by default;
+- larger file and folder icons;
+- compact two-line grid labels;
+- narrower navigation/sidebar layout;
+- softer selection cards using the system accent;
+- blur-friendly libcosmic surfaces;
+- system theme integration, so dark/light and accent changes continue to follow COSMIC/libcosmic.
+
+See [NYXNIRI.md](NYXNIRI.md) for the recommended Niri rule and integration
+settings.
+
+## Build from source
 
 ```sh
-# Clone the project using `git`
-git clone https://github.com/pop-os/cosmic-files
-# Change to the directory that was created by `git`
-cd cosmic-files
-# Build an optimized version using `cargo`, this may take a while
+git clone https://github.com/LuYishan-4/cosmic-files-niri
+cd cosmic-files-niri
 cargo build --release
-# Run the optimized version using `cargo`
 cargo run --release
 ```
 
-## Community and Contributing
+The binary and application ID intentionally remain compatible with upstream
+COSMIC Files (`cosmic-files` / `com.system76.CosmicFiles`) so it can be used
+as a drop-in replacement.
 
-The COSMIC desktop environment is maintained by System76 for use in Pop!_OS. A list of all COSMIC projects can be found in the
-[cosmic-epoch](https://github.com/pop-os/cosmic-epoch) project's README. If you would like to discuss COSMIC and Pop!_OS, please
-consider joining the [Pop!_OS Chat](https://chat.pop-os.org/). More information and links can be found on the
-[Pop!_OS Website](https://pop.system76.com).
+## Upstream
+
+Original project: [pop-os/cosmic-files](https://github.com/pop-os/cosmic-files)
 
 ## License
 
-This project is licensed under [GPLv3](LICENSE)
+GPL-3.0-only. See [LICENSE](LICENSE).
