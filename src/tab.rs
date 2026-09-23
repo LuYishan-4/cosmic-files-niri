@@ -5357,7 +5357,7 @@ impl Tab {
         row = row.push(next_button);
         w += f32::from(space_xxs).mul_add(2.0, 16.0);
 
-        row = row.push(widget::space::horizontal().width(Length::Fixed(space_s.into())));
+        row = row.push(widget::space::horizontal().width(Length::Fixed(space_xxs.into())));
         w += f32::from(space_s);
 
         //TODO: allow resizing?
@@ -5564,11 +5564,11 @@ impl Tab {
                     let location = self.location.with_path(ancestor.to_path_buf());
                     let mouse_area = crate::mouse_area::MouseArea::new(
                         widget::button::custom(row)
-                            .padding(space_xxxs)
+                            .padding([space_xxxs, space_xxs])
                             .class(if self.location_context_menu_index == Some(index) {
-                                theme::Button::LinkActive
+                                theme::Button::Standard
                             } else {
-                                theme::Button::Link
+                                theme::Button::HeaderBar
                             })
                             .on_press(if ancestor == path {
                                 Message::EditLocation(Some(self.location.clone().into()))
@@ -5606,7 +5606,7 @@ impl Tab {
                     widget::button::custom(widget::text::heading(fl!("trash")))
                         .padding(space_xxxs)
                         .on_press(Message::Location(Location::Trash))
-                        .class(theme::Button::Text)
+                        .class(theme::Button::HeaderBar)
                         .into(),
                 );
             }
@@ -5615,7 +5615,7 @@ impl Tab {
                     widget::button::custom(widget::text::heading(fl!("recents")))
                         .padding(space_xxxs)
                         .on_press(Message::Location(Location::Recents))
-                        .class(theme::Button::Text)
+                        .class(theme::Button::HeaderBar)
                         .into(),
                 );
             }
@@ -5628,7 +5628,7 @@ impl Tab {
                             display_name.clone(),
                             path.clone(),
                         )))
-                        .class(theme::Button::Text)
+                        .class(theme::Button::HeaderBar)
                         .into(),
                 );
             }
