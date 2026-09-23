@@ -2540,18 +2540,46 @@ impl Application for App {
                 .on_surface_action(|action| cosmic::Action::Surface(action.flatten()))
         }
 
-        let mut nav = nav
+        let nav: Element<'_, cosmic::Action<Self::Message>> = nav
             .into_container()
+            .class(theme::Container::Transparent)
+            .height(Length::Fill)
+            .into();
+
+        let brand: Element<'_, cosmic::Action<Self::Message>> = widget::container(
+            widget::row::with_children([
+                icon::from_name("com.system76.CosmicFiles")
+                    .size(28)
+                    .icon()
+                    .into(),
+                widget::column::with_children([
+                    widget::text::heading("Nyx Files").into(),
+                    widget::text::caption("Niri / NyxNiri").into(),
+                ])
+                .spacing(2)
+                .into(),
+            ])
+            .align_y(Alignment::Center)
+            .spacing(10),
+        )
+        .padding([10, 12])
+        .class(crate::nyx::toolbar())
+        .into();
+
+        let sidebar = widget::column::with_children([brand, nav])
+            .spacing(8)
+            .height(Length::Fill);
+
+        let mut sidebar = widget::container(sidebar)
             .padding([10, 8])
-            .class(crate::nyx::sidebar());
+            .class(crate::nyx::sidebar())
+            .height(Length::Fill);
 
         if !self.core.is_condensed() {
-            nav = nav.max_width(crate::nyx::SIDEBAR_MAX_WIDTH);
+            sidebar = sidebar.max_width(crate::nyx::SIDEBAR_MAX_WIDTH);
         }
 
-        Some(Element::from(
-            nav.width(Length::Shrink).height(Length::Fill),
-        ))
+        Some(Element::from(sidebar.width(Length::Shrink)))
     }
 
     fn nav_context_menu(&self) -> Option<Vec<widget::menu::Tree<cosmic::Action<Self::Message>>>> {
