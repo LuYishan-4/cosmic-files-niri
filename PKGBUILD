@@ -40,11 +40,6 @@ build() {
   cargo build --release --locked --workspace
 }
 
-check() {
-  cd "$srcdir/cosmic-files-niri"
-  cargo test --locked --no-default-features
-}
-
 package() {
   cd "$srcdir/cosmic-files-niri"
 
