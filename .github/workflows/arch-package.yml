@@ -15,6 +15,10 @@ on:
       - 'scripts/cosmic-files-niri-setup'
       - '.github/workflows/arch-package.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   package:
     runs-on: ubuntu-latest
