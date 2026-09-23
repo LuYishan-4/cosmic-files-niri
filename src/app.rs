@@ -2404,10 +2404,13 @@ impl Application for App {
                 ),
             ]);
 
-        // NyxNiri uses translucent windows, so request blur for the normal app
-        // as well as desktop surfaces. Compositors that do not support it simply
-        // render the normal COSMIC background.
-        core.set_auto_blur(Auto::Window | Auto::Popup);
+        // Desktop surfaces can use libcosmic's overlap-aware blur. Normal app
+        // windows deliberately leave blur to Niri; enabling libcosmic auto-blur
+        // there creates COSMIC layer-surface overlap subscriptions that do not
+        // exist in a standalone Niri session.
+        if matches!(flags.mode, Mode::Desktop) {
+            core.set_auto_blur(Auto::Window | Auto::Popup);
+        }
         let mut app = Self {
             core,
             about,
