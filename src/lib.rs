@@ -28,6 +28,7 @@ mod mime_app;
 pub mod mime_icon;
 mod mounter;
 mod mouse_area;
+pub(crate) mod nyx;
 pub mod operation;
 mod spawn_detached;
 pub mod tab;
