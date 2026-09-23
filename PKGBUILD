@@ -20,13 +20,13 @@ makedepends=(
   'cargo'
   'clang'
   'git'
-  'just'
   'lld'
 )
 provides=('cosmic-files')
 conflicts=('cosmic-files')
 source=("git+${url}.git")
 b2sums=('SKIP')
+options=('!lto')
 
 pkgver() {
   cd "$srcdir/cosmic-files-niri"
@@ -36,9 +36,8 @@ pkgver() {
 build() {
   cd "$srcdir/cosmic-files-niri"
   export CARGO_TARGET_DIR=target
-  export CARGO_PROFILE_RELEASE_LTO=thin
   export RUSTFLAGS="${RUSTFLAGS:-} -C link-arg=-fuse-ld=lld"
-  just build-release --locked
+  cargo build --release --locked --workspace
 }
 
 check() {
