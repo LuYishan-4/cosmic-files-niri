@@ -164,13 +164,19 @@ fn button_appearance(
     let mut appearance = widget::button::Style::new();
     if selected {
         if accent {
-            appearance.background = Some(Color::from(cosmic.accent_color()).into());
-            appearance.icon_color = Some(Color::from(cosmic.on_accent_color()));
+            // NyxNiri selection: use a surface card with an accent outline
+            // instead of a fully saturated accent block.
+            appearance.background = Some(Color::from(cosmic.bg_component_color()).into());
+            appearance.icon_color = Some(Color::from(cosmic.accent_color()));
             if cut {
-                appearance.text_color = Some(Color::from(cosmic.accent.on_disabled));
+                appearance.text_color = Some(Color::from(
+                    cosmic.background(theme.transparent).component.on_disabled,
+                ));
             } else {
-                appearance.text_color = Some(Color::from(cosmic.on_accent_color()));
+                appearance.text_color = Some(Color::from(cosmic.on_bg_component_color()));
             }
+            appearance.outline_width = 1.0;
+            appearance.outline_color = Color::from(cosmic.accent_color());
         } else {
             appearance.background = Some(Color::from(cosmic.bg_component_color()).into());
         }
@@ -2357,7 +2363,7 @@ impl Item {
             .wrapping(text::Wrapping::WordOrGlyph)
             .align_x(text::Alignment::Center)
             .ellipsize(text::Ellipsize::Middle(text::EllipsizeHeightLimit::Lines(
-                3,
+                2,
             )))
     }
 
@@ -5686,13 +5692,14 @@ impl Tab {
             ..
         } = self.config;
 
-        let mut grid_spacing = space_xxs;
+        // NyxNiri uses a little more breathing room between visual cards.
+        let mut grid_spacing = space_xxs + space_xxxs;
         if let Location::Desktop(_path, _output, desktop_config) = &self.location {
             icon_sizes.grid = desktop_config.icon_size;
             grid_spacing = desktop_config.grid_spacing_for(space_xxs);
         }
 
-        let text_height = 3 * 20; // 3 lines of text
+        let text_height = 2 * 20; // NyxNiri: compact two-line labels
         let item_width = (3 * space_xxs + icon_sizes.grid() + 3 * space_xxs) as usize;
         let item_height =
             (space_xxxs + icon_sizes.grid() + space_xxxs + text_height + space_xxxs) as usize;
@@ -5790,7 +5797,7 @@ impl Tab {
                                 .content_fit(ContentFit::Contain)
                                 .size(icon_sizes.grid()),
                         )
-                        .padding(space_xxxs)
+                        .padding(space_xxs)
                         .class(button_style(
                             item.selected,
                             item.highlighted,
@@ -5820,6 +5827,7 @@ impl Tab {
 
                     let mut column = widget::column::with_capacity(buttons.len())
                         .align_x(Alignment::Center)
+                        .spacing(space_xxxs)
                         .height(Length::Fixed(item_height as f32))
                         .width(Length::Fixed(item_width as f32));
                     for button in buttons {
