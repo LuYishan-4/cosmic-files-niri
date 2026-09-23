@@ -33,6 +33,17 @@ The setup helper then:
 
 It creates `.bak` copies before changing existing Niri bind/rule files.
 
+## Standalone Niri behavior
+
+The default build intentionally does **not** enable libcosmic's `dbus-config`
+feature. A Niri session does not normally run `cosmic-settings-daemon`, and
+enabling that backend causes repeated `CosmicTheme.*` / `CosmicTk` watcher
+errors. Configuration falls back to libcosmic's non-daemon config path instead.
+
+Normal application blur is also compositor-owned. The Niri rule in
+[NYXNIRI.md](NYXNIRI.md) provides blur/opacity/corner clipping without creating
+COSMIC layer-surface overlap subscriptions.
+
 ## Visual changes
 
 - Grid view is the default for normal file browsing and dialogs.
