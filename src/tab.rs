@@ -5409,13 +5409,6 @@ impl Tab {
         .height(Length::Fixed((space_m + 4).into()))
         .padding([0, space_xxs]);
 
-        let accent_rule =
-            rule::horizontal(1).class(theme::Rule::Custom(Box::new(|theme| rule::Style {
-                color: theme.cosmic().accent_color().into(),
-                radius: 0.0.into(),
-                fill_mode: rule::FillMode::Full,
-                snap: true,
-            })));
         let heading_rule = widget::container(rule::horizontal(1))
             .padding([0, theme::active().cosmic().corner_radii.radius_xs[0] as u16]);
 
@@ -5490,9 +5483,14 @@ impl Tab {
                     );
                 }
                 row = row.push(popover);
-                let mut column = widget::column::with_capacity(4).padding([0, space_s]);
-                column = column.push(row);
-                column = column.push(accent_rule);
+                let toolbar = widget::container(row)
+                    .width(Length::Fill)
+                    .padding([space_xxxs, space_xxs])
+                    .class(crate::nyx::toolbar());
+                let mut column = widget::column::with_capacity(3)
+                    .padding([space_xxs, space_s])
+                    .spacing(space_xxs);
+                column = column.push(toolbar);
                 if self.config.view == View::List && !condensed {
                     column = column.push(heading_row);
                     column = column.push(heading_rule);
@@ -5504,7 +5502,7 @@ impl Tab {
                 crate::mouse_area::MouseArea::new(
                     widget::button::custom(widget::icon::from_name("edit-symbolic").size(16))
                         .padding(space_xxs)
-                        .class(theme::Button::Icon)
+                        .class(theme::Button::HeaderBar)
                         .on_press(Message::EditLocation(Some(self.location.clone().into()))),
                 )
                 .on_middle_press(move |_| Message::OpenInNewTab(path.clone())),
@@ -5635,9 +5633,15 @@ impl Tab {
         }
 
         row = row.extend(children);
-        let mut column = widget::column::with_capacity(4).padding([0, space_s]);
-        column = column.push(row);
-        column = column.push(accent_rule);
+        let toolbar = widget::container(row)
+            .width(Length::Fill)
+            .padding([space_xxxs, space_xxs])
+            .class(crate::nyx::toolbar());
+
+        let mut column = widget::column::with_capacity(3)
+            .padding([space_xxs, space_s])
+            .spacing(space_xxs);
+        column = column.push(toolbar);
 
         if self.config.view == View::List && !condensed {
             column = column.push(heading_row);
@@ -5687,6 +5691,7 @@ impl Tab {
         let cosmic_theme::Spacing {
             space_xxs,
             space_xxxs,
+            space_s,
             ..
         } = theme::spacing();
 
@@ -5703,10 +5708,10 @@ impl Tab {
             grid_spacing = desktop_config.grid_spacing_for(space_xxs);
         }
 
-        let text_height = 2 * 20; // NyxNiri: compact two-line labels
-        let item_width = (3 * space_xxs + icon_sizes.grid() + 3 * space_xxs) as usize;
+        let text_height = 2 * 20; // compact two-line labels
+        let item_width = (icon_sizes.grid() + 6 * space_s) as usize;
         let item_height =
-            (space_xxxs + icon_sizes.grid() + space_xxxs + text_height + space_xxxs) as usize;
+            (space_xxs + icon_sizes.grid() + space_xxs + text_height + space_xxs) as usize;
 
         let (width, height) = match self.size_opt.get() {
             Some(size) => (
@@ -5803,8 +5808,8 @@ impl Tab {
                         )
                         .padding(space_xxs)
                         .class(button_style(
-                            item.selected,
-                            item.highlighted,
+                            false,
+                            false,
                             item.cut,
                             false,
                             false,
@@ -5816,11 +5821,11 @@ impl Tab {
                                 .id(item.button_id.clone())
                                 .padding([0, space_xxxs])
                                 .class(button_style(
-                                    item.selected,
-                                    item.highlighted,
+                                    false,
+                                    false,
                                     item.cut,
-                                    true,
-                                    true,
+                                    false,
+                                    false,
                                     matches!(self.mode, Mode::Desktop),
                                 )),
                             widget::text::body(&item.name),
@@ -5844,11 +5849,16 @@ impl Tab {
                         );
                     }
 
+                    let card = widget::container(column)
+                        .width(Length::Fixed(item_width as f32))
+                        .height(Length::Fixed(item_height as f32))
+                        .class(crate::nyx::file_card(item.selected, item.highlighted));
+
                     let column: Element<Message> =
                         if item.metadata.is_dir() && item.location_opt.is_some() {
-                            self.dnd_dest(&item.location_opt.clone().unwrap(), column)
+                            self.dnd_dest(&item.location_opt.clone().unwrap(), card)
                         } else {
-                            column.into()
+                            card.into()
                         };
 
                     if item.selected {
@@ -6050,10 +6060,8 @@ impl Tab {
         };
         let row_height = icon_size + 2 * space_xxs;
 
-        let mut column = widget::column::with_capacity(3);
+        let mut column = widget::column::with_capacity(3).spacing(space_xxxs);
         let mut y: f32 = 0.0;
-
-        let rule_padding = theme::active().cosmic().corner_radii.radius_xs[0] as u16;
 
         //TODO: move to function
         let visible_rect = {
@@ -6082,12 +6090,6 @@ impl Tab {
                     item.rect_opt.set(None);
                     hidden += 1;
                     continue;
-                }
-
-                if count > 0 {
-                    column = column
-                        .push(widget::container(rule::horizontal(1)).padding([0, rule_padding]));
-                    y += 1.0;
                 }
 
                 item.pos_opt.set(Some((count, 0)));
@@ -6250,13 +6252,13 @@ impl Tab {
                                 widget::button::custom(row)
                                     .width(Length::Fill)
                                     .id(item.button_id.clone())
-                                    .padding([0, space_xxs])
+                                    .padding([space_xxxs, space_xxs])
                                     .class(button_style(
                                         item.selected,
                                         item.highlighted,
                                         item.cut,
                                         true,
-                                        true,
+                                        false,
                                         false,
                                     )),
                             )
@@ -6398,7 +6400,7 @@ impl Tab {
         let drag_col = (!drag_items.is_empty())
             .then(|| Element::from(widget::column::with_children(drag_items)));
 
-        let mouse_area = mouse_area::MouseArea::new(column.padding([0, space_s]))
+        let mouse_area = mouse_area::MouseArea::new(column.padding([space_xxs, space_s]))
             .with_id(Id::new("list-view"))
             .on_press(|_| Message::Click(None))
             .on_auto_scroll(Message::AutoScroll)
@@ -6587,8 +6589,10 @@ impl Tab {
             _ => {}
         }
         let mut tab_view = widget::container(tab_column)
+            .padding(space_xxs)
             .height(Length::Fill)
-            .width(Length::Fill);
+            .width(Length::Fill)
+            .class(crate::nyx::content_panel());
 
         // Desktop will not show DnD indicator
         if self.dnd_hovered.as_ref().map(|(l, _)| l) == Some(&tab_location)
